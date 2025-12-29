@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clínica Gounchaero - Menú Digital</title>
+    <!-- Core Libraries -->
+    <script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+    <!-- Lucide Core for stable icon rendering -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Tailwind CSS & Babel -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;700&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #C4A47C; border-radius: 10px; }
+
+        .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        .animate-zoom-in { animation: zoomIn 0.7s ease-out forwards; }
+        .animate-slide-in { animation: slideIn 0.5s ease-out forwards; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes zoomIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes slideIn { from { transform: translateX(1rem); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    </style>
+</head>
+<body class="bg-neutral-100 selection:bg-[#C4A47C]/30">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        /**
+         * Lucide Icon Wrapper Component
+         * Uses the core lucide library to render icons as SVGs
+         */
+        const Icon = ({ name, size = 16, className = "" }) => {
+            const [svg, setSvg] = useState("");
+
+            useEffect(() => {
+                if (window.lucide && window.lucide.icons) {
+                    const icon = window.lucide.icons[name];
+                    if (icon) {
+                        const svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                        svgElement.setAttribute("width", size);
+                        svgElement.setAttribute("height", size);
+                        svgElement.setAttribute("viewBox", "0 0 24 24");
+                        svgElement.setAttribute("fill", "none");
+                        svgElement.setAttribute("stroke", "currentColor");
+                        svgElement.setAttribute("stroke-width", "2");
+                        svgElement.setAttribute("stroke-linecap", "round");
+                        svgElement.setAttribute("stroke-linejoin", "round");
+                        
+                        icon[2].forEach(([tag, attrs]) => {
+                            const node = document.createElementNS("http://www.w3.org/2000/svg", tag);
+                            Object.entries(attrs).forEach(([key, value]) => {
+                                node.setAttribute(key, value);
+                            });
+                            svgElement.appendChild(node);
+                        });
+                        
+                        setSvg(svgElement.outerHTML);
+                    }
+                }
+            }, [name, size]);
+
+            if (!svg) return <div style={{ width: size, height: size }} className={className} />;
+            
+            return (
+                <span 
+                    className={`inline-block ${className}`}
+                    dangerouslySetInnerHTML={{ __html: svg }}
+                />
+            );
+        };
+
+        const App = () => {
+            const [currentPage, setCurrentPage] = useState(0);
+            const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+            const pages = [
+                // 0. Cover
+                {
+                    type: 'cover',
+                    title: 'CLÍNICA GOUNCHAERO',
+                    koreanTitle: '고운채로의원',
+                    subtitle: 'Stay Beautiful Clinic',
+                    welcome: 'Bienvenidos a la',
+                    category: 'GUÍA DE PROGRAMAS Y TRATAMIENTOS',
+                    version: 'VERSIÓN 2025'
+                },
+                // 1. Lesiones Cutáneas
+                {
+                    id: '01',
+                    title: 'Lesiones Cutáneas',
+                    subtitle: 'Láser CO2, Erbium y Zoom-Pico',
+                    description: 'Remoción precisa de imperfecciones cutáneas con tecnología láser avanzada.',
+                    sections: [
+                        {
+                            name: 'Remoción de imperfecciones',
+                            items: [
+                                { label: 'Lunares (Normal / Elevado)', price: '11k / 33k' },
+                                { label: 'Revisiones (>3mm / Retoque)', price: '22k / 3.3k' },
+                                { label: 'Acrocordones / Verrugas planas', price: '11k' },
+                                { label: 'Verrugas Vulgares / Milium', price: '55k / 11k+' },
+                                { label: 'Hemangiomas (Normal / >3mm)', price: '11k / 22k' },
+                                { label: 'Lentigos (Manchas Solares)', price: '33k / 55k+' },
+                                { label: 'Remoción de Tatuaje (Cejas)', price: '220k' }
+                            ]
+                        },
+                        {
+                            name: 'Programas Full Care',
+                            items: [
+                                { label: 'Rostro completo', price: '550k' },
+                                { label: 'Cuello completo', price: '550k' },
+                                { label: 'Rostro y Cuello completos', price: '770k+' }
+                            ]
+                        }
+                    ]
+                },
+                // 2. Shurink Universe
+                {
+                    id: '02',
+                    title: 'Shurink Universe (HIFU)',
+                    subtitle: 'Lifting Ultrasónico de Alta Intensidad',
+                    description: 'Lifting no invasivo para definir el contorno facial 및 regenerar el colágeno.',
+                    protocol: [
+                        'Limpieza profunda facial',
+                        'Shurink Universe (HIFU) Lifting',
+                        'Terapia LED Regenerativa',
+                        'Máscara de tela (Sheet Mask)'
+                    ],
+                    sections: [
+                        {
+                            name: 'Paquetes Shurink',
+                            items: [
+                                { label: '300 disparos (1 sesión)', price: '220k' },
+                                { label: '300 disparos (3 sesiones)', price: '539k' },
+                                { label: '600 disparos (1 sesión)', price: '385k' },
+                                { label: '600 disparos (3 sesiones)', price: '935k' }
+                            ]
+                        }
+                    ]
+                },
+                // 3. Bótox
+                {
+                    id: '03',
+                    title: 'Bótox y Skin Bótox',
+                    subtitle: 'Suavidad y Definición',
+                    sections: [
+                        {
+                            name: 'Bótox Medytox (Estándar)',
+                            items: [
+                                { label: 'Mandíbula / V-Line', price: '44k' },
+                                { label: 'Arrugas (Frente / Ojos)', price: '33k' },
+                                { label: 'Trapecio / Pantorrillas (100U)', price: '88k' }
+                            ]
+                        },
+                        {
+                            name: 'Bótox Coretox (Premium)',
+                            description: 'Fórmula de alta pureza sin proteínas complejas para evitar la resistencia.',
+                            items: [
+                                { label: 'Mandíbula / V-Line', price: '66k' },
+                                { label: 'Arrugas (Frente / Ojos)', price: '44k' },
+                                { label: 'Trapecio / Pantorrillas (200U)', price: '198k' }
+                            ]
+                        },
+                        {
+                            name: 'Skin Bótox (Dermotoxina)',
+                            items: [
+                                { label: 'Línea de mandíbula', price: '88k' },
+                                { label: 'Rostro completo', price: '220k' }
+                            ]
+                        }
+                    ]
+                },
+                // 4. Oligio RF
+                {
+                    id: '04',
+                    title: 'Oligio RF (Monopolar RF)',
+                    subtitle: 'Premium Skin Tightening',
+                    description: 'Oligio es un tratamiento de vanguardia que utiliza radiofrecuencia monopolar para revitalizar la piel desde sus capas más profundas. Al aplicar calor controlado en la dermis, induce una contracción inmediata de las fibras de colágeno existentes y estimula la producción de nuevo colágeno a largo plazo. Este proceso resulta en un efecto de \'Tightening\' superior, mejorando la elasticidad, reduciendo poros y suavizando líneas finas. Es ideal para quienes buscan una piel firme y densa sin cirugía ni recuperación, adaptándose a la anatomía facial.',
+                    sections: [
+                        {
+                            name: 'Programas de Toning y Vascular',
+                            items: [
+                                { label: 'Standard Toning (1s/5s/10s)', price: '99k / 495k / 880k' },
+                                { label: 'Premium Toning (1s/5s/10s)', price: '143k / 649k / 1090k' },
+                                { label: 'Signature Toning (1s/5s/10s)', price: '165k / 748k / 1190k' },
+                                { label: 'Premium Vascular (1s/5s/10s)', price: '130k / 590k / 1050k' },
+                                { label: 'Signature Vascular (1s/5s/10s)', price: '160k / 720k / 1280k' }
+                            ]
+                        }
+                    ],
+                    footerProtocol: [
+                        'Standard Toning: Limpieza > Láser Toning > Hidratación > Mascarilla',
+                        'Premium Toning: Limpieza > Láser Toning > Vitamina > Hidratación > Mascarilla',
+                        'Signature Toning: Limpieza > Láser Toning > LDM > Hidratación > Mascarilla',
+                        'Premium Vascular: Limpieza > Clarity All-kill > Gold Toning > Hidratación',
+                        'Signature Vascular: Limpieza > Clarity All-kill > Gold Toning > LDM'
+                    ]
+                },
+                // 5. Textura
+                {
+                    id: '05',
+                    title: 'Tratamiento de Textura',
+                    subtitle: 'Reparación de Cicatrices y Poros',
+                    description: 'Para un tratamiento integral de la textura cutánea, empleamos cuatro tecnologías láser distintas adaptadas a cada tipo de imperfección. Desde cicatrices profundas hasta poros dilatados y acné activo, seleccionamos el láser específico según la fase y la gravedad de la lesión. Este enfoque personalizado permite abordar tanto las secuelas como las causas inflamatorias, renovando la superficie de la piel de manera segura. El resultado es una dermis visiblemente más lisa, con un tono uniforme y una estructura regenerada desde el interior.',
+                    sections: [
+                        {
+                            name: 'Protocolos de Renovación',
+                            items: [
+                                { label: 'Hollywood MLA (Cicatrices)', price: '110k (1s) / 440k (5s)' },
+                                { label: 'Fraxel Erbium (Poros)', price: '110k (1s) / 440k (5s)' },
+                                { label: 'Neobeam (Control de Sebo)', price: '88k (1s) / 352k (5s)' },
+                                { label: 'Potenza RF (Needle RF)', price: '220k (1s) / 880k (5s)' }
+                            ]
+                        }
+                    ],
+                    footerProtocol: [
+                        'MLA: Limpieza > Anestesia > Hollywood MLA > CRYO > LED > Mascarilla',
+                        'Fraxel: Limpieza > Anestesia > Fraxel > CRYO > LED > Mascarilla',
+                        'Neobeam: Limpieza > GA Peeling > Extracción > Neobeam > CRYO > LED',
+                        'Potenza RF: Limpieza > Anestesia > Potenza > LED > Mascarilla'
+                    ]
+                },
+                // 6. Potenza & Skin Boosters
+                {
+                    id: '06',
+                    title: 'Potenza & Skin Boosters',
+                    subtitle: 'Drug Delivery con Pumping Tip',
+                    description: 'El sistema patentado de Potenza utiliza presión positiva al retirar las micro-agujas para empujar los Skin Boosters directamente hacia la dermis. Esto garantiza una absorción 및 eficacia significativamente mayor que la aplicación manual tradicional.',
+                    protocol: [
+                        'Limpieza', 'Anestesia', 'Potenza Pumping Tip', 'Skin Booster', 'LDM', 'LED', 'Mascarilla'
+                    ],
+                    sections: [
+                        {
+                            name: 'Boosters con Pumping Tip',
+                            headers: ['Booster', '1 ses', '3 ses', '5 ses'],
+                            tableItems: [
+                                ['PDRN (Regeneración)', '385k', '990k', '1353k'],
+                                ['Juvelook (Colágeno)', '450k', '1265k', '-'],
+                                ['Exosomas (Stem Cell)', '480k', '1390k', '-']
+                            ]
+                        }
+                    ]
+                },
+                // 7. Boosters Tradicionales
+                {
+                    id: '07',
+                    title: 'Skin Boosters Tradicionales',
+                    subtitle: 'Inyección Manual y Derma Shine',
+                    sections: [
+                        {
+                            name: 'Menú de Inyectables',
+                            items: [
+                                { label: 'Lizne (1cc) + LED', price: '88k' },
+                                { label: 'Lizne (2cc) + LED', price: '165k' },
+                                { label: 'Rejuran HB / i / s (1cc) + LED', price: '180k' },
+                                { label: 'Rejuran HB / i / s (2cc) + LED', price: '290k' },
+                                { label: 'Rejuran Healer (2cc) + LED', price: '275k' },
+                                { label: 'Juvelook Skin (4cc) (1s/3s)', price: '280k / 800k' }
+                            ]
+                        },
+                        {
+                            name: 'Opciones Adicionales',
+                            items: [
+                                { label: 'Upgrade: Punta Derma Shine', price: '+30k' },
+                                { label: 'Upgrade: LDM Water Drop', price: '+55k' }
+                            ]
+                        }
+                    ]
+                },
+                // 8. Acne & Facial Care
+                {
+                    id: '08',
+                    title: 'Acne & Facial Care',
+                    subtitle: 'Gestión Integral de Piel',
+                    sections: [
+                        {
+                            name: 'Programas de Cuidado',
+                            headers: ['Programa', '1 ses', '5 ses'],
+                            tableItems: [
+                                ['Whitening Care', '77k', '352k'],
+                                ['Hidratación y Calmante', '77k', '352k'],
+                                ['Aquapeel (Limpieza)', '110k', '500k'],
+                                ['Co-Aquapeel (Nariz)', '44k', '198k'],
+                                ['LDM Básico', '110k', '500k'],
+                                ['LDM Lifting', '165k', '750k'],
+                                ['Hiracell (Barrera)', '165k', '748k']
+                            ]
+                        }
+                    ],
+                    footerProtocol: [
+                        'Aquapeel: Limpieza > AQUA 1 > AQUA 2 > Extracción > CRYO > Mascarilla',
+                        'Co-Aquapeel: Loción X > AQUA 1 > AQUA 2 > AQUA 3',
+                        'Whitening: Limpieza > Iontoforesis > LED > Mascarilla',
+                        'Hidratación: Limpieza > SONO/CRYO > LED > Mascarilla',
+                        'LDM: Limpieza > LDM (Modo 1/2) > LED > Mascarilla'
+                    ]
+                },
+                // 9. Depilación
+                {
+                    id: '09',
+                    title: 'Depilación Láser',
+                    subtitle: 'Laser Hair Removal Femenina y Masculina',
+                    sections: [
+                        {
+                            name: 'Mujer (1s / Pack 5s)',
+                            items: [
+                                { label: 'Axilas / Bozo', price: '33k / 150k' },
+                                { label: 'Brazos Medios / Enteros', price: '77k / 121k (1s)' },
+                                { label: 'Piernas Medias / Enteras', price: '99k / 165k (1s)' },
+                                { label: 'Cavado Completo', price: '110k / 480k' },
+                                { label: 'Bikini Line', price: '70k / 300k' },
+                                { label: 'Rostro Completo', price: '110k / 500k' }
+                            ]
+                        },
+                        {
+                            name: 'Hombre (1s / Pack 5s)',
+                            items: [
+                                { label: 'Barba Completa', price: '150k / 670k' },
+                                { label: 'Pecho / Espalda', price: '130k / 150k (1s)' },
+                                { label: 'Axilas', price: '40k / 180k' },
+                                { label: 'Brazos / Piernas Enteras', price: '150k / 190k (1s)' }
+                            ]
+                        }
+                    ]
+                },
+                // 10. Sueros & Capilar
+                {
+                    id: '10',
+                    title: 'Sueros y Vitalidad',
+                    subtitle: 'IV Therapy y Regeneración Capilar',
+                    description: 'AGF-39: La proteína Noggin bloquea las señales BMP que mantienen al folículo en 휴지기, activando el switch de crecimiento y nutriendo con factores VEGF/IGF-1.',
+                    sections: [
+                        {
+                            name: 'Regeneración Capilar AGF-39',
+                            items: [
+                                { label: 'Plan Intensivo Forte (6s)', price: '600k' },
+                                { label: 'Plan Completo Forte+Basic (12s)', price: '990k' }
+                            ]
+                        },
+                        {
+                            name: 'Inyecciones 및 Cócteles (1s)',
+                            items: [
+                                { label: 'Vitamina D (Inmunidad)', price: '33k' },
+                                { label: 'Inyección Cenicienta (Antioxidante)', price: '44k' },
+                                { label: 'Glutatión (Brillo/Detox)', price: '33k' },
+                                { label: 'Mega Vitamina C', price: '33k' },
+                                { label: 'Inyección de Ajo (Vitalidad)', price: '33k' },
+                                { label: 'Inyección Red Up (Vino)', price: '33k' },
+                                { label: 'Inyección de Placenta (1s / 10s)', price: '22k / 198k' }
+                            ]
+                        }
+                    ]
+                }
+            ];
+
+            const nextPage = () => setCurrentPage((prev) => Math.min(prev + 1, pages.length - 1));
+            const prevPage = () => setCurrentPage((prev) => Math.max(prev - 1, 0));
+            const goToPage = (index) => {
+                setCurrentPage(index);
+                setIsMenuOpen(false);
+            };
+
+            const page = pages[currentPage];
+
+            return (
+                <div className="min-h-screen bg-neutral-100 flex items-center justify-center p-0 md:p-6 font-sans text-neutral-800">
+                    <div className="w-full max-w-lg bg-white shadow-2xl overflow-hidden flex flex-col h-screen md:h-[850px] relative border-x border-neutral-200">
+                        
+                        {/* Header */}
+                        <div className="bg-[#2D2D2D] p-4 flex justify-between items-center text-[10px] uppercase tracking-[0.2em] text-white/80 z-20">
+                            <button onClick={() => setIsMenuOpen(true)} className="flex items-center gap-2 hover:text-white transition-colors">
+                                <Icon name="menu" size={16} /> MENÚ
+                            </button>
+                            <span className="font-light tracking-widest">CLÍNICA GOUNCHAERO</span>
+                            <span>{currentPage > 0 ? `Pág. ${currentPage}` : 'INICIO'}</span>
+                        </div>
+
+                        {/* Menu Overlay */}
+                        {isMenuOpen && (
+                            <div className="absolute inset-0 bg-[#2D2D2D]/95 z-50 p-8 text-white flex flex-col animate-fade-in">
+                                <div className="flex justify-end mb-8">
+                                    <button onClick={() => setIsMenuOpen(false)}><Icon name="x" size={24} /></button>
+                                </div>
+                                <nav className="flex flex-col gap-4 overflow-y-auto">
+                                    {pages.map((p, i) => (
+                                        <button 
+                                            key={i} 
+                                            onClick={() => goToPage(i)}
+                                            className={`text-left py-2 border-b border-white/10 text-sm tracking-widest uppercase transition-all ${currentPage === i ? 'text-[#C4A47C] pl-4' : 'text-white/60 hover:text-white'}`}
+                                        >
+                                            {i === 0 ? 'Portada' : `${p.id}. ${p.title}`}
+                                        </button>
+                                    ))}
+                                </nav>
+                            </div>
+                        )}
+
+                        {/* Content Area */}
+                        <div className="flex-1 overflow-y-auto bg-[#FCFAF7] relative px-6 py-8 md:px-10">
+                            {page.type === 'cover' ? (
+                                <div className="h-full flex flex-col justify-center items-center text-center space-y-12 animate-zoom-in">
+                                    <div className="space-y-4">
+                                        <span className="text-[#C4A47C] tracking-[0.4em] text-xs uppercase font-medium">{page.welcome}</span>
+                                        <div className="border-y border-[#C4A47C]/30 py-8 px-4">
+                                            <h1 className="text-4xl font-serif tracking-tight text-[#2D2D2D] leading-tight mb-2">{page.title}</h1>
+                                            <p className="text-sm text-neutral-400 tracking-[0.3em] font-light">{page.koreanTitle}</p>
+                                        </div>
+                                        <p className="text-[#2D2D2D]/60 italic text-lg font-light tracking-wide">{page.subtitle}</p>
+                                    </div>
+                                    <div className="space-y-4 pt-8">
+                                        <h2 className="text-[10px] font-bold tracking-[0.4em] uppercase text-neutral-400">{page.category}</h2>
+                                        <div className="w-12 h-px bg-[#C4A47C] mx-auto"></div>
+                                        <p className="text-neutral-300 font-mono text-[9px] tracking-widest">{page.version}</p>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="space-y-8 animate-slide-in pb-10">
+                                    <div className="border-b border-neutral-200 pb-4">
+                                        <div className="flex items-center gap-3 mb-1">
+                                            <span className="text-[#C4A47C] font-serif text-3xl font-light">{page.id}</span>
+                                            <h2 className="text-2xl font-serif text-[#2D2D2D] tracking-tight">{page.title}</h2>
+                                        </div>
+                                        <p className="text-neutral-400 text-[10px] uppercase tracking-[0.2em]">{page.subtitle}</p>
+                                    </div>
+
+                                    {page.description && (
+                                        <p className="text-xs leading-relaxed text-neutral-600 italic border-l-2 border-[#C4A47C]/40 pl-4 py-1">
+                                            {page.description}
+                                        </p>
+                                    )}
+
+                                    {page.protocol && (
+                                        <div className="bg-white p-4 border border-neutral-100 shadow-sm rounded-sm">
+                                            <h4 className="text-[10px] font-bold text-[#C4A47C] uppercase tracking-widest mb-3 flex items-center gap-2">
+                                                <Icon name="zap" size={12} /> Protocolo del Tratamiento
+                                            </h4>
+                                            <div className="flex flex-wrap gap-2">
+                                                {page.protocol.map((step, i) => (
+                                                    <div key={i} className="flex items-center text-[10px] text-neutral-500 bg-neutral-50 px-2 py-1 border border-neutral-100">
+                                                        <span className="font-bold text-[#C4A47C] mr-2">{i+1}.</span> {step}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {page.sections.map((section, idx) => (
+                                        <div key={idx} className="space-y-4">
+                                            <h3 className="text-[11px] font-bold text-[#2D2D2D] uppercase tracking-[0.2em] border-l-2 border-[#2D2D2D] pl-3">
+                                                {section.name}
+                                            </h3>
+                                            
+                                            {section.headers ? (
+                                                <div className="overflow-x-auto">
+                                                    <table className="w-full text-[11px] border-collapse">
+                                                        <thead>
+                                                            <tr className="bg-neutral-50 border-y border-neutral-100">
+                                                                {section.headers.map((h, i) => (
+                                                                    <th key={i} className="py-2 px-1 text-left font-bold text-neutral-400 text-[9px] uppercase tracking-tighter">{h}</th>
+                                                                ))}
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {section.tableItems.map((row, i) => (
+                                                                <tr key={i} className="border-b border-neutral-50 hover:bg-neutral-50/50 transition-colors">
+                                                                    {row.map((cell, j) => (
+                                                                        <td key={j} className={`py-3 px-1 ${j === 0 ? 'font-medium text-[#2D2D2D]' : 'text-right font-mono text-neutral-500'}`}>
+                                                                            {cell}
+                                                                        </td>
+                                                                    ))}
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            ) : (
+                                                <div className="space-y-4">
+                                                    {section.items.map((item, i) => (
+                                                        <div key={i} className="flex justify-between items-baseline gap-2 group">
+                                                            <span className="text-[12px] text-neutral-700 font-light group-hover:text-[#C4A47C] transition-colors">{item.label}</span>
+                                                            <div className="flex-1 border-b border-dotted border-neutral-200 mb-1 opacity-50"></div>
+                                                            <span className="text-[12px] font-bold text-[#2D2D2D] font-mono">{item.price}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+
+                                    {page.footerProtocol && (
+                                        <div className="mt-8 pt-6 border-t border-neutral-100">
+                                            <h4 className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest mb-3">Protocolos Detallados</h4>
+                                            <ul className="space-y-1">
+                                                {page.footerProtocol.map((p, i) => (
+                                                    <li key={i} className="text-[9px] text-neutral-400 italic flex items-start gap-2">
+                                                        <span className="text-[#C4A47C]">•</span> {p}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Footer */}
+                        <div className="px-8 py-6 bg-white border-t border-neutral-100 text-center space-y-3 z-10">
+                            <div className="flex flex-col items-center gap-1">
+                                <p className="text-[9px] font-bold text-[#2D2D2D] uppercase tracking-[0.2em]">Clínica Gounchaero | Stay Beautiful</p>
+                                <p className="text-[9px] text-neutral-400 uppercase tracking-wider">5F CentralHills, Euncheon-ro 118, Gwanak-gu, Seoul</p>
+                            </div>
+                            <a 
+                                href="https://maps.app.goo.gl/Agm7uH8ShGymbTia7" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 px-4 py-2 bg-[#2D2D2D] text-white text-[9px] uppercase tracking-[0.2em] rounded-sm hover:bg-[#C4A47C] transition-all group"
+                            >
+                                <Icon name="map-pin" size={10} className="group-hover:scale-110 transition-transform" /> Ver en Google Maps <Icon name="external-link" size={8} />
+                            </a>
+                        </div>
+
+                        {/* Controls */}
+                        <div className="absolute bottom-24 left-0 right-0 px-6 flex justify-between items-center z-30 pointer-events-none">
+                            <button 
+                                onClick={prevPage}
+                                disabled={currentPage === 0}
+                                className={`p-3 rounded-full bg-white/80 backdrop-blur shadow-lg border border-neutral-100 pointer-events-auto transition-all ${currentPage === 0 ? 'opacity-0 scale-90' : 'opacity-100 hover:bg-[#C4A47C] hover:text-white'}`}
+                            >
+                                <Icon name="chevron-left" size={20} />
+                            </button>
+                            
+                            <button 
+                                onClick={nextPage}
+                                disabled={currentPage === pages.length - 1}
+                                className={`p-3 rounded-full bg-white/80 backdrop-blur shadow-lg border border-neutral-100 pointer-events-auto transition-all ${currentPage === pages.length - 1 ? 'opacity-0 scale-90' : 'opacity-100 hover:bg-[#C4A47C] hover:text-white'}`}
+                            >
+                                <Icon name="chevron-right" size={20} />
+                            </button>
+                        </div>
+
+                        {/* Progress Bar */}
+                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-neutral-100">
+                            <div 
+                                className="h-full bg-[#C4A47C] transition-all duration-500 ease-out"
+                                style={{ width: `${(currentPage / (pages.length - 1)) * 100}%` }}
+                            />
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
